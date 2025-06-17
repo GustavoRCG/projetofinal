@@ -1,0 +1,42 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;  
+}
+
+.cardCortes {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    gap: 20px;
+    
+    background-color:#000000;
+    max-width: 260px;
+    padding: 20px;
+    border-radius: 10px;
+
+    & .imageCorte {
+        width: 100%;
+        border-radius: 10px;
+    }
+
+    & .divH3 {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+        margin-block-start: auto;
+        
+        & h3 {
+            font-size: 20px;
+            color: rgb(255, 102, 0);
+            text-align: center;
+        }
+
+        & span {
+            font-size: 18px;
+            color: rgb(255, 255, 255);
+            text-align: center;
+        }
+    }
+}

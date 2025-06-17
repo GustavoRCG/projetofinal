@@ -1,0 +1,27 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+main {
+    max-width: 1220px;
+    padding: 40px 10px;
+    margin: 0 auto;
+
+
+    & .sectionFlex {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+}
+
+@media (min-width: 600px) {
+   main {
+        & .sectionFlex {
+            justify-content: space-between;
+        }
+   }
+}
