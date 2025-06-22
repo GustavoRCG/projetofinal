@@ -1,7 +1,7 @@
-import "./Cortes.css";
-
-// import card cortes
+import { useEffect, useState } from "react";
+import { getCortes, Servico } from "../service/api";
 import CardCortes from "../componentes/CardCortes";
+import "./Cortes.css";
 
 import nomeimagem from "../assets/cortes/hight fade.jpg";
 import nomeimagem2 from "../assets/cortes/low fade.jpg";
@@ -12,55 +12,47 @@ import nomeimagem6 from "../assets/cortes/undercutmaior.png";
 import nomeimagem7 from "../assets/cortes/corte social.jpeg";
 import nomeimagem8 from "../assets/cortes/buzz cut.webp";
 
-
-
-function Cortes() {
-    return (
-        <main>
-            <section className="sectionFlex">
-                <CardCortes 
-                    image={nomeimagem}
-                    title="High Fade"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem2}
-                    title="Low Fade"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem3}
-                    title="Medium Fade"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem4}
-                    title="Moicano"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem5}
-                    title="Mullet"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem6}
-                    title="Undercut"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem7}
-                    title="Social"
-                    valor="R$ 40,00"
-                />
-                <CardCortes 
-                    image={nomeimagem8}
-                    title="Buzz Cut"
-                    valor="R$ 40,00"
-                />
-            </section>
-        </main>
-    );
+const imagensCorte: { [key: string]: string } = {
+  "High Fade": nomeimagem,
+  "Low Fade": nomeimagem2,
+  "Medium Fade": nomeimagem3,
+  Moicano: nomeimagem4,
+  Mullet: nomeimagem5,
+  Undercut: nomeimagem6,
+  Social: nomeimagem7,
+  "Buzz Cut": nomeimagem8,
 };
 
-export default Cortes;  
+function Cortes() {
+  const [cortes, setCortes] = useState<Servico[]>([]);
+
+  useEffect(() => {
+    const fetchCortes = async () => {
+      try {
+        const data = await getCortes();
+        setCortes(data);
+      } catch (error) {
+        console.error("Erro ao buscar cortes:", error);
+      }
+    };
+
+    fetchCortes();
+  }, []);
+
+  return (
+    <main>
+      <section className="sectionFlex">
+        {cortes.map((corte) => (
+          <CardCortes
+            key={corte.id}
+            image={imagensCorte[corte.name] || ""}
+            title={corte.name}
+            valor={`R$ ${corte.preco}`}
+          />
+        ))}
+      </section>
+    </main>
+  );
+}
+
+export default Cortes;

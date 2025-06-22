@@ -29,7 +29,6 @@ const Login = () => {
       const { token } = response.data;
       login(token);
       navigate("/home");
-      location.reload();
     } catch (error) {
       console.error(error);
       alert("Error, Email or Password incorrect.");

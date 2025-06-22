@@ -1,184 +1,121 @@
-import React from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Link } from "react-router-dom";
-import { cpf as cpfValidator } from "cpf-cnpj-validator";
-import axios from "axios";
-import api from "../service/api";
+import { useNavigate, Link } from "react-router-dom";
+import { createUser, NewUserData } from "../service/api";
+import { AxiosError } from "axios";
 
-type CadastroFormInputs = {
-  nome: string;
-  email: string;
-  cpf: string;
-  senha: string;
-  confirmarSenha: string;
-};
-
-const Cadastro: React.FC = () => {
+const Cadastro = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
-  } = useForm<CadastroFormInputs>();
+  } = useForm<NewUserData>();
 
-  const senha = watch("senha");
+  const navigate = useNavigate();
 
-  const handleRegister: SubmitHandler<CadastroFormInputs> = async (data) => {
+  // ...
+
+  const onSubmit: SubmitHandler<NewUserData> = async (data) => {
     try {
-      await api.post("/users", {
-        name: data.nome,
-        cpf: data.cpf,
-        email: data.email,
-        password: data.senha,
-        admin: false,
-      });
-      alert("Registration completed successfully!");
-      location.reload();
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const errorMessage =
-          error?.response?.data.error
-            .map((e: { message: string }) => e.message)
-            .join(", ") || "Error registering";
-        alert(errorMessage);
+      await createUser(data);
+      alert("Usuário cadastrado com sucesso!");
+      navigate("/login");
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response) {
+        const responseData = error.response.data as {
+          error?: string;
+          details?: unknown;
+        };
+        console.error("Erro do backend:", responseData);
+        alert(responseData.error || "Erro ao cadastrar usuário.");
+      } else {
+        alert("Erro inesperado. Tente novamente.");
       }
     }
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
-      }}
-    >
+    <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
       <form
-        onSubmit={handleSubmit(handleRegister)}
+        onSubmit={handleSubmit(onSubmit)}
         style={{
+          width: "100%",
           maxWidth: "400px",
-          textAlign: "center",
-          backgroundColor: "#f9f9f9",
           padding: "2rem",
+          backgroundColor: "#f9f9f9",
           borderRadius: "8px",
-          boxShadow: "0 0 10px rgba(0, 0, 0, 0.1)",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
         }}
       >
-        <h2>Cadastro</h2>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="nome">Nome:</label>
-          <input
-            type="text"
-            id="nome"
-            {...register("nome", { required: "O nome é obrigatório" })}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
-          />
-          {errors.nome && (
-            <p style={{ color: "red", fontSize: "0.8rem" }}>
-              {errors.nome.message}
-            </p>
-          )}
-        </div>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            {...register("email", {
-              required: "O email é obrigatório",
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                message: "Insira um email válido",
-              },
-            })}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
-          />
-          {errors.email && (
-            <p style={{ color: "red", fontSize: "0.8rem" }}>
-              {errors.email.message}
-            </p>
-          )}
-        </div>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="cpf">CPF:</label>
-          <input
-            type="text"
-            id="cpf"
-            {...register("cpf", {
-              required: "O CPF é obrigatório",
-              validate: (value) =>
-                cpfValidator.isValid(value) || "CPF inválido",
-            })}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
-          />
-          {errors.cpf && (
-            <p style={{ color: "red", fontSize: "0.8rem" }}>
-              {errors.cpf.message}
-            </p>
-          )}
-        </div>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="senha">Senha:</label>
-          <input
-            type="password"
-            id="senha"
-            {...register("senha", {
-              required: "A senha é obrigatória",
-              minLength: {
-                value: 8,
-                message: "A senha deve ter no mínimo 8 caracteres",
-              },
-              validate: (value) => {
-                if (!/[A-Z]/.test(value))
-                  return "A senha deve conter pelo menos uma letra maiúscula";
-                if (!/[a-z]/.test(value))
-                  return "A senha deve conter pelo menos uma letra minúscula";
-                if (!/[0-9]/.test(value))
-                  return "A senha deve conter pelo menos um número";
-                if (!/[!@#$%^&*(),.?":{}|<>]/.test(value))
-                  return "A senha deve conter pelo menos um caractere especial";
-                return true;
-              },
-            })}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
-          />
-          {errors.senha && (
-            <p style={{ color: "red", fontSize: "0.8rem" }}>
-              {errors.senha.message}
-            </p>
-          )}
-        </div>
-        <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="confirmarSenha">Confirmar Senha:</label>
-          <input
-            type="password"
-            id="confirmarSenha"
-            {...register("confirmarSenha", {
-              required: "A confirmação de senha é obrigatória",
-              validate: (value) =>
-                value === senha || "As senhas não correspondem",
-            })}
-            style={{ width: "100%", padding: "0.5rem", marginTop: "0.5rem" }}
-          />
-          {errors.confirmarSenha && (
-            <p style={{ color: "red", fontSize: "0.8rem" }}>
-              {errors.confirmarSenha.message}
-            </p>
-          )}
-        </div>
-        <button type="submit" style={{ padding: "0.5rem 1rem" }}>
+        <h2 style={{ textAlign: "center" }}>Cadastro</h2>
+
+        <label>Nome:</label>
+        <input
+          {...register("name", { required: "Nome é obrigatório" })}
+          style={{ width: "100%", marginBottom: "10px" }}
+        />
+        {errors.name && <p style={{ color: "red" }}>{errors.name.message}</p>}
+
+        <label>Email:</label>
+        <input
+          {...register("email", {
+            required: "Email é obrigatório",
+            pattern: {
+              value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+              message: "Email inválido",
+            },
+          })}
+          style={{ width: "100%", marginBottom: "10px" }}
+        />
+        {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
+
+        <label>CPF:</label>
+        <input
+          {...register("cpf", {
+            required: "CPF é obrigatório",
+            pattern: {
+              value: /^\d{11}$/,
+              message: "CPF deve conter 11 dígitos numéricos",
+            },
+          })}
+          style={{ width: "100%", marginBottom: "10px" }}
+        />
+        {errors.cpf && <p style={{ color: "red" }}>{errors.cpf.message}</p>}
+
+        <label>Senha:</label>
+        <input
+          type="password"
+          {...register("password", {
+            required: "Senha é obrigatória",
+            minLength: {
+              value: 8,
+              message: "Senha deve ter no mínimo 8 caracteres",
+            },
+            validate: (value) =>
+              /[A-Z]/.test(value) || "Deve conter ao menos uma letra maiúscula",
+          })}
+          style={{ width: "100%", marginBottom: "10px" }}
+        />
+        {errors.password && (
+          <p style={{ color: "red" }}>{errors.password.message}</p>
+        )}
+
+        <button
+          type="submit"
+          style={{
+            padding: "10px",
+            width: "100%",
+            backgroundColor: "#333",
+            color: "#fff",
+            border: "none",
+            borderRadius: "4px",
+          }}
+        >
           Cadastrar
         </button>
 
-        <div style={{ paddingTop: "20px" }}>
-          <Link
-            to={"/login"}
-            style={{ textDecoration: "none", color: "black" }}
-          >
-            Já possui uma conta? Faça login
-          </Link>
-        </div>
+        <p style={{ textAlign: "center", marginTop: "1rem" }}>
+          Já tem conta? <Link to="/login">Faça login</Link>
+        </p>
       </form>
     </div>
   );

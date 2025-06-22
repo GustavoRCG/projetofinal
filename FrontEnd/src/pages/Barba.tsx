@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
+import { getBarbas, Servico } from "../service/api";
+import CardCortes from "../componentes/CardCortes";
 import "./Barba.css";
 
-// import card Barba
-import CardCortes from "../componentes/CardCortes";
-
+// Imagens locais
 import nomeimagem9 from "../assets/barbas/barbaitaliana.jpg";
 import nomeimagem10 from "../assets/barbas/alinhamento.jpg";
 import nomeimagem11 from "../assets/barbas/bigode.jpg";
@@ -12,26 +13,45 @@ import nomeimagem14 from "../assets/barbas/navalha.webp";
 import nomeimagem15 from "../assets/barbas/cavanhaque.jpg";
 import nomeimagem16 from "../assets/barbas/barbaterapia.webp";
 
+// Lista fixa para relacionar nome da API com imagem local
+const imagensBarba: { [key: string]: string } = {
+  Italiana: nomeimagem9,
+  Alinhamento: nomeimagem10,
+  Bigode: nomeimagem11,
+  "Cavanhaque com Bigode": nomeimagem12,
+  Lenhador: nomeimagem13,
+  Navalha: nomeimagem14,
+  Cavanhaque: nomeimagem15,
+  "Barba Terapia": nomeimagem16,
+};
+
 function Barba() {
+  const [barbas, setBarbas] = useState<Servico[]>([]);
+
+  useEffect(() => {
+    const fetchBarbas = async () => {
+      try {
+        const data = await getBarbas();
+        setBarbas(data);
+      } catch (error) {
+        console.error("Erro ao buscar barbas:", error);
+      }
+    };
+
+    fetchBarbas();
+  }, []);
+
   return (
     <main>
       <section className="sectionFlex">
-        <CardCortes image={nomeimagem9} title="Italiana" valor="R$ 35,00" />
-        <CardCortes image={nomeimagem10} title="Alinhamento" valor="R$ 30,00" />
-        <CardCortes image={nomeimagem11} title="Bigopde" valor="R$ 35,00" />
-        <CardCortes
-          image={nomeimagem12}
-          title="Cavanhaque com Bigode"
-          valor="R$ 40,00"
-        />
-        <CardCortes image={nomeimagem13} title="Lenhador" valor="R$ 40,00" />
-        <CardCortes image={nomeimagem14} title="Navalha" valor="R$ 35,00" />
-        <CardCortes image={nomeimagem15} title="Cavanhaque" valor="R$ 35,00" />
-        <CardCortes
-          image={nomeimagem16}
-          title="Barba Terapia"
-          valor="R$ 50,00"
-        />
+        {barbas.map((barba) => (
+          <CardCortes
+            key={barba.id}
+            image={imagensBarba[barba.name] || ""}
+            title={barba.name}
+            valor={`R$ ${barba.preco}`}
+          />
+        ))}
       </section>
     </main>
   );

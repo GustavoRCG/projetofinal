@@ -84,6 +84,7 @@ export const createUser = async (req: Request, res: Response) => {
     const user = await UserModel.create({ name, email, password, cpf });
     res.status(201).json(user);
   } catch (error) {
+    console.error("Erro ao cadastrar usuário:", error);
     res.status(500).json({ error: "Internal Server Error", details: error });
   }
 };
